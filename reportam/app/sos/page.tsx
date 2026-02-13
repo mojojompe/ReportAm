@@ -94,19 +94,36 @@ export default function SOSPage() {
         setIsSubmitting(true);
         try {
             const formData = new FormData();
-            formData.append("title", data.title || "Emergency Report");
-            formData.append("description", data.description || "Emergency reported via SOS page");
+
+            // Backend expects these fields:
+            // type, category, image, description, state_id, lga_id, address_text, lat, lng
+            formData.append("type", "emergency"); // Mark as emergency type
             formData.append("category", data.category);
-            formData.append("location", data.location);
-            if (data.latitude) formData.append("latitude", data.latitude.toString());
-            if (data.longitude) formData.append("longitude", data.longitude.toString());
+            formData.append("description", data.description || data.title || "Emergency reported via SOS page");
+            formData.append("address_text", data.location); // Map location to address_text
+
+            // Add LGA as community name if provided
+            if (data.lga) {
+                formData.append("community_name", data.lga);
+            }
+
+            // Add coordinates if available
+            if (data.latitude) formData.append("lat", data.latitude.toString());
+            if (data.longitude) formData.append("lng", data.longitude.toString());
+
+            // Add image if provided
             if (data.image) formData.append("image", data.image);
+
+            // Add title if provided
+            if (data.title) formData.append("title", data.title);
 
             await reportApi.submitReport(formData);
             toast.success("Emergency Report Sent!");
             router.push("/");
-        } catch {
-            toast.error("Failed to send report.");
+        } catch (error: any) {
+            console.error("Submit error:", error);
+            const errorMsg = error?.response?.data?.message || "Failed to send report.";
+            toast.error(errorMsg);
         } finally {
             setIsSubmitting(false);
         }

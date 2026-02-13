@@ -84,4 +84,22 @@ export const reportApi = {
         const response = await api.delete(`/api/reports/${reportId}/affected`);
         return response.data;
     },
+
+    // Get comments for a report
+    getComments: async (reportId: string) => {
+        const response = await api.get(`/api/reports/${reportId}/comments`);
+        return response.data;
+    },
+
+    // Post a comment
+    createComment: async (reportId: string, data: { text: string; username?: string; parentId?: string }) => {
+        const response = await api.post(`/api/reports/${reportId}/comments`, data);
+        return response.data;
+    },
+
+    // Like a comment
+    likeComment: async (commentId: string) => {
+        const response = await api.post(`/api/comments/${commentId}/like`);
+        return response.data;
+    },
 };

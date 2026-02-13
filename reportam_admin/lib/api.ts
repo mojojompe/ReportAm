@@ -115,4 +115,19 @@ export const adminApi = {
             critical: reportsList.filter((r) => r.is_emergency || r.priority === "high").length,
         };
     },
+
+    getComments: async (): Promise<any[]> => {
+        try {
+            const response = await api.get("/api/admin/comments");
+            return response.data;
+        } catch (error) {
+            console.error("Failed to fetch comments:", error);
+            return [];
+        }
+    },
+
+    deleteComment: async (id: string) => {
+        const response = await api.delete(`/api/admin/comments/${id}`);
+        return response.data;
+    },
 };

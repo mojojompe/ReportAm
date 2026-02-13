@@ -11,7 +11,9 @@ import {
     Building2,
     LogOut,
     Menu,
-    X
+    X,
+    MessageSquare,
+    MapPin
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { adminApi } from "@/lib/api";
@@ -30,6 +32,16 @@ const sidebarLinks = [
         title: "Resolved",
         href: "/resolved",
         icon: CheckCircle,
+    },
+    {
+        title: "Comments",
+        href: "/comments",
+        icon: MessageSquare,
+    },
+    {
+        title: "LGA Stats",
+        href: "/stats/lga",
+        icon: MapPin,
     },
     {
         title: "Analytics",
