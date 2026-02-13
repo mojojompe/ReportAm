@@ -20,6 +20,7 @@ interface Report {
     comments: number;
     timestamp: string;
     category?: string;
+    affected_count?: number;
 }
 
 interface FeedItemProps {
