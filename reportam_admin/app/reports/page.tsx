@@ -29,6 +29,8 @@ export default function ReportsPage() {
     const [filteredReports, setFilteredReports] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [lgaFilter, setLgaFilter] = useState("all");
+    const [lgas, setLgas] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -44,6 +46,16 @@ export default function ReportsPage() {
             const active = data.filter((r: any) => r.status !== "resolved");
             setReports(active);
             setFilteredReports(active);
+
+            // Fetch LGAs
+            const states = await adminApi.getStates();
+            const oyoState = states.find((s: any) => s.name.toLowerCase().includes("oyo"));
+            if (oyoState) {
+                const lgaData = await adminApi.getLgas(oyoState.id || oyoState._id);
+                // Handle if LGA data is array of strings or objects
+                const lgaNames = lgaData.map((l: any) => typeof l === 'string' ? l : l.name);
+                setLgas(lgaNames.sort());
+            }
         } catch (error) {
             console.error("Failed to fetch reports:", error);
             toast.error("Failed to load reports");
@@ -59,6 +71,10 @@ export default function ReportsPage() {
             result = result.filter(r => r.status === statusFilter);
         }
 
+        if (lgaFilter !== "all") {
+            result = result.filter(r => (r.lga || r.location || "").toLowerCase().includes(lgaFilter.toLowerCase()));
+        }
+
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             result = result.filter(r =>
@@ -69,7 +85,7 @@ export default function ReportsPage() {
         }
 
         setFilteredReports(result);
-    }, [searchQuery, statusFilter, reports]);
+    }, [searchQuery, statusFilter, lgaFilter, reports]);
 
     const handleStatusUpdate = async (id: string, newStatus: string) => {
         try {
@@ -129,6 +145,17 @@ export default function ReportsPage() {
                         <SelectItem value="in-progress">In Progress</SelectItem>
                     </SelectContent>
                 </Select>
+                <Select value={lgaFilter} onValueChange={setLgaFilter}>
+                    <SelectTrigger className="w-[180px] bg-white">
+                        <SelectValue placeholder="Filter by LGA" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All LGAs</SelectItem>
+                        {lgas.map(lga => (
+                            <SelectItem key={lga} value={lga}>{lga}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             <Card className="bg-white border-none shadow-sm">
@@ -152,8 +179,19 @@ export default function ReportsPage() {
                                     <TableRow key={report._id || report.id}>
                                         <TableCell>
                                             <div className="h-10 w-10 rounded-lg bg-gray-100 overflow-hidden">
-                                                {report.image || report.imageUrl ? (
-                                                    <img src={report.image || report.imageUrl} alt="" className="h-full w-full object-cover" />
+                                                {(report.image || report.imageUrl) ? (
+                                                    <img
+                                                        src={(report.image || report.imageUrl)?.startsWith("http")
+                                                            ? (report.image || report.imageUrl)
+                                                            : `https://reportam-backend-sun4.onrender.com${(report.image || report.imageUrl)?.startsWith('/') ? '' : '/'}${report.image || report.imageUrl}`}
+                                                        alt=""
+                                                        className="h-full w-full object-cover"
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).style.display = 'none';
+                                                            (e.target as HTMLImageElement).parentElement!.innerText = 'Err';
+                                                            (e.target as HTMLImageElement).parentElement!.className = "h-full w-full flex items-center justify-center text-xs text-gray-400";
+                                                        }}
+                                                    />
                                                 ) : (
                                                     <div className="h-full w-full flex items-center justify-center text-xs text-gray-400">No Img</div>
                                                 )}

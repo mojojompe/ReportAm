@@ -17,6 +17,8 @@ export default function ResolvedReportsPage() {
     const [filteredReports, setFilteredReports] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("all");
+    const [lgaFilter, setLgaFilter] = useState("all");
+    const [lgas, setLgas] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -32,6 +34,15 @@ export default function ResolvedReportsPage() {
             const resolved = data.filter((r: any) => r.status === "resolved");
             setReports(resolved);
             setFilteredReports(resolved);
+
+            // Fetch LGAs
+            const states = await adminApi.getStates();
+            const oyoState = states.find((s: any) => s.name.toLowerCase().includes("oyo"));
+            if (oyoState) {
+                const lgaData = await adminApi.getLgas(oyoState.id || oyoState._id);
+                const lgaNames = lgaData.map((l: any) => typeof l === 'string' ? l : l.name);
+                setLgas(lgaNames.sort());
+            }
         } catch (error) {
             console.error("Failed to fetch reports:", error);
             toast.error("Failed to load reports");
@@ -57,8 +68,13 @@ export default function ResolvedReportsPage() {
             result = result.filter((report) => report.category === categoryFilter);
         }
 
+        // LGA filter
+        if (lgaFilter !== "all") {
+            result = result.filter((report) => (report.lga || report.location || "").toLowerCase().includes(lgaFilter.toLowerCase()));
+        }
+
         setFilteredReports(result);
-    }, [searchQuery, categoryFilter, reports]);
+    }, [searchQuery, categoryFilter, lgaFilter, reports]);
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this report?")) return;
@@ -127,6 +143,17 @@ export default function ResolvedReportsPage() {
                                     <SelectItem value="security">Security</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <Select value={lgaFilter} onValueChange={setLgaFilter}>
+                                <SelectTrigger className="w-full sm:w-[180px]">
+                                    <SelectValue placeholder="Filter by LGA" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All LGAs</SelectItem>
+                                    {lgas.map(lga => (
+                                        <SelectItem key={lga} value={lga}>{lga}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 </CardHeader>
@@ -160,7 +187,7 @@ export default function ResolvedReportsPage() {
                                         <TableCell className="max-w-[200px] truncate">
                                             {report.address_text || report.community_name || report.location || "N/A"}
                                         </TableCell>
-                                        <TableCell>{report.lga || "N/A"}</TableCell>
+                                        <TableCell>{report.lga || report.location || "N/A"}</TableCell>
                                         <TableCell>
                                             <Badge className={getStatusColor(report.status)}>
                                                 {report.status}

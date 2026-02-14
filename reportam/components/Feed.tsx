@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FeedItem } from "./ui/FeedItem";
+import { FeedItemSkeleton } from "./ui/FeedItemSkeleton";
 import { reportApi } from "@/lib/api";
 import {
     Loader2, Construction, Droplets, Trash2,
@@ -124,8 +125,10 @@ export function Feed() {
 
     if (isLoading) {
         return (
-            <div className="flex h-64 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-[#6BA898]" />
+            <div className="w-full max-w-2xl mx-auto space-y-6 pb-20 pt-6 px-4 sm:px-0">
+                {[1, 2, 3].map((i) => (
+                    <FeedItemSkeleton key={i} />
+                ))}
             </div>
         );
     }

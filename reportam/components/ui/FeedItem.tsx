@@ -24,6 +24,7 @@ interface Report {
     title: string;
     description: string;
     location: string;
+    image?: string;
     imageUrl?: string;
     status: "pending" | "in-progress" | "resolved";
     likes: number;
@@ -136,6 +137,7 @@ export function FeedItem({ report }: FeedItemProps) {
                 useCORS: true,
                 allowTaint: true,
                 ignoreElements: (element) => element.tagName === 'IFRAME',
+                proxy: "https://reportam-backend-sun4.onrender.com", // Hint to html2canvas to reuse backend if feasible, or just rely on useCORS
             });
             const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
             const shareText = `Check out this report on ReportAm:\n${report.title}\n${report.description}\n\nView more at: https://reportam.vercel.app/`;
@@ -227,8 +229,9 @@ export function FeedItem({ report }: FeedItemProps) {
             await reportApi.likeComment(commentId);
             // Optionally reload to sync exact state
         } catch (error) {
+            console.error("Like failed", error); // Log error
             toast.error("Failed to like comment");
-            loadComments(); // Revert on error
+            // loadComments(); // Revert on error - deciding to keep optimistic for better UX even if failed
         }
     };
 
@@ -241,13 +244,21 @@ export function FeedItem({ report }: FeedItemProps) {
         >
             <Card ref={cardRef} className="overflow-hidden border border-[#EAECF0] bg-white shadow-sm hover:shadow-md transition-shadow duration-300 rounded-2xl sm:rounded-3xl">
                 {/* Image - Full Width, No Padding */}
-                {report.imageUrl && (
+                {/* Image - Full Width, No Padding */}
+                {/* Robust Image Handling */}
+                {(report.imageUrl || report.image) && (
                     <div>
                         <div className="relative aspect-video w-full bg-[#F2F4F7]">
                             <img
-                                src={report.imageUrl.startsWith("http") ? report.imageUrl : `https://reportam-backend-sun4.onrender.com${report.imageUrl}`}
+                                src={(report.imageUrl || report.image)?.startsWith("http")
+                                    ? (report.imageUrl || report.image)
+                                    : `https://reportam-backend-sun4.onrender.com${(report.imageUrl || report.image)?.startsWith('/') ? '' : '/'}${report.imageUrl || report.image}`}
                                 alt={report.title}
                                 className="h-full w-full object-cover"
+                                crossOrigin="anonymous"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "https://placehold.co/600x400?text=No+Image";
+                                }}
                             />
                         </div>
                     </div>

@@ -130,4 +130,15 @@ export const adminApi = {
         const response = await api.delete(`/api/admin/comments/${id}`);
         return response.data;
     },
+
+    // Location endpoints
+    getStates: async () => {
+        const response = await api.get("/api/locations/states");
+        return response.data.data || response.data;
+    },
+
+    getLgas: async (stateId: string) => {
+        const response = await api.get(`/api/locations/states/${stateId}/lgas`);
+        return response.data.data || response.data;
+    },
 };

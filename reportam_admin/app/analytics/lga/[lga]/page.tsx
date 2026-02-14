@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { adminApi } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { startOfMonth, format, subMonths } from "date-fns";
@@ -16,26 +16,46 @@ import {
     Pie,
     Cell
 } from "recharts";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-export default function AnalyticsPage() {
+export default function LgaAnalyticsPage({ params }: { params: Promise<{ lga: string }> }) {
+    const router = useRouter();
+    const [unwrappedParams, setUnwrappedParams] = useState<{ lga: string } | null>(null);
     const [reports, setReports] = useState<any[]>([]);
     const [categoryData, setCategoryData] = useState<any[]>([]);
     const [timelineData, setTimelineData] = useState<any[]>([]);
-    const [lgaStats, setLgaStats] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [lgaName, setLgaName] = useState("");
 
     useEffect(() => {
+        params.then(setUnwrappedParams);
+    }, [params]);
+
+    useEffect(() => {
+        if (!unwrappedParams) return;
+
+        const decodedLga = decodeURIComponent(unwrappedParams.lga);
+        setLgaName(decodedLga);
+
         const fetchData = async () => {
             try {
                 setLoading(true);
                 const data = await adminApi.getReports();
-                setReports(data);
+
+                // Filter by LGA
+                const lgaReports = data.filter((r: any) =>
+                    (r.lga || r.location || "").toLowerCase().includes(decodedLga.toLowerCase())
+                );
+
+                setReports(lgaReports);
 
                 // Process Category Data
                 const catMap: Record<string, number> = {};
-                data.forEach((r: any) => {
+                lgaReports.forEach((r: any) => {
                     const cat = r.category || 'Other';
                     catMap[cat] = (catMap[cat] || 0) + 1;
                 });
@@ -48,7 +68,7 @@ export default function AnalyticsPage() {
                     const key = format(date, 'MMM yyyy');
                     timelineMap[key] = 0;
                 }
-                data.forEach((r: any) => {
+                lgaReports.forEach((r: any) => {
                     const date = new Date(r.createdAt || r.timestamp);
                     const key = format(date, 'MMM yyyy');
                     if (timelineMap[key] !== undefined) {
@@ -56,19 +76,6 @@ export default function AnalyticsPage() {
                     }
                 });
                 setTimelineData(Object.keys(timelineMap).map(month => ({ month, reports: timelineMap[month] })));
-
-                // Process LGA Data
-                const lgaMap: Record<string, number> = {};
-                data.forEach((r: any) => {
-                    const lga = r.lga || (r.location && r.location.split(',').pop()?.trim()) || "Unknown";
-                    lgaMap[lga] = (lgaMap[lga] || 0) + 1;
-                });
-
-                const lgaList = Object.keys(lgaMap).map(name => ({ name, value: lgaMap[name] }))
-                    .sort((a, b) => b.value - a.value);
-
-                setLgaStats(lgaList);
-
             } catch (error) {
                 console.error("Failed to fetch analytics data:", error);
             } finally {
@@ -77,25 +84,36 @@ export default function AnalyticsPage() {
         };
 
         fetchData();
-    }, []);
+    }, [unwrappedParams]);
+
+    if (!unwrappedParams) return null;
 
     return (
         <div className="p-8 space-y-8">
-            <div>
-                <h1 className="text-2xl font-bold font-display text-[#101828]">Analytics Dashboard</h1>
-                <p className="text-muted-foreground">Insights into community reporting trends</p>
+            <div className="flex items-center gap-4">
+                <Button variant="outline" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div>
+                    <h1 className="text-2xl font-bold font-display text-[#101828]">Analytics: {lgaName}</h1>
+                    <p className="text-muted-foreground">Detailed reports for {lgaName}</p>
+                </div>
             </div>
 
             {loading ? (
                 <div className="flex items-center justify-center h-64 text-gray-500">
                     Loading analytics data...
                 </div>
+            ) : reports.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                    <p>No reports found for this LGA.</p>
+                </div>
             ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                     <Card className="col-span-4">
                         <CardHeader>
                             <CardTitle>Reports Over Time</CardTitle>
-                            <CardDescription>Monthly reporting volume for the last 6 months</CardDescription>
+                            <CardDescription>Monthly reporting volume for {lgaName}</CardDescription>
                         </CardHeader>
                         <CardContent className="pl-2">
                             <div className="h-[300px]">
@@ -118,7 +136,7 @@ export default function AnalyticsPage() {
                     <Card className="col-span-3">
                         <CardHeader>
                             <CardTitle>Reports by Category</CardTitle>
-                            <CardDescription>Distribution of improved issues</CardDescription>
+                            <CardDescription>Distribution of issues in {lgaName}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="h-[300px]">
@@ -144,32 +162,10 @@ export default function AnalyticsPage() {
                                     {categoryData.map((entry, index) => (
                                         <div key={entry.name} className="flex items-center gap-1.5 text-xs">
                                             <div className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                                            <span>{entry.name}</span>
+                                            <span>{entry.name} ({entry.value})</span>
                                         </div>
                                     ))}
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* LGA Breakdown */}
-                    <Card className="col-span-4 lg:col-span-7">
-                        <CardHeader>
-                            <CardTitle>Reports by LGA</CardTitle>
-                            <CardDescription>Click on an LGA to view detailed statistics</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                                {lgaStats.map((lga) => (
-                                    <a
-                                        key={lga.name}
-                                        href={`/analytics/lga/${encodeURIComponent(lga.name)}`}
-                                        className="flex flex-col items-center justify-center p-4 border rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group"
-                                    >
-                                        <span className="text-2xl font-bold text-[#101828] group-hover:text-green-700 transition-colors">{lga.value}</span>
-                                        <span className="text-sm text-gray-500 text-center truncate w-full">{lga.name}</span>
-                                    </a>
-                                ))}
                             </div>
                         </CardContent>
                     </Card>
