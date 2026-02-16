@@ -250,9 +250,9 @@ export function FeedItem({ report }: FeedItemProps) {
                     <div>
                         <div className="relative aspect-video w-full bg-[#F2F4F7]">
                             <img
-                                src={(report.imageUrl || report.image)?.startsWith("http")
-                                    ? (report.imageUrl || report.image)
-                                    : `https://reportam-backend-sun4.onrender.com${(report.imageUrl || report.image)?.startsWith('/') ? '' : '/'}${report.imageUrl || report.image}`}
+                                src={(report.image || report.imageUrl)?.startsWith("http")
+                                    ? (report.image || report.imageUrl)
+                                    : `https://reportam-backend-sun4.onrender.com${(report.image || report.imageUrl)?.startsWith('/') ? '' : '/'}${report.image || report.imageUrl}`}
                                 alt={report.title}
                                 className="h-full w-full object-cover"
                                 crossOrigin="anonymous"
