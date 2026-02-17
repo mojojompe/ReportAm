@@ -312,7 +312,7 @@ export function ReportWizard() {
                                     className={cn(
                                         "text-white px-8 h-12 rounded-xl text-base font-medium transition-colors duration-200",
                                         isStep1Valid
-                                            ? "bg-[#4CAF50] hover:bg-[#43A047] shadow-md shadow-green-200" // Brighter green when valid
+                                            ? "bg-[#047857] hover:bg-[#047857] shadow-md shadow-green-200" // Brighter green when valid
                                             : "bg-[#6BA898] hover:bg-[#5a9182]" // Original/Default color
                                     )}
                                 >
@@ -398,8 +398,8 @@ export function ReportWizard() {
                                             className={cn(
                                                 "text-white px-8 h-12 rounded-xl text-base font-medium min-w-[150px] transition-colors duration-200",
                                                 isStep2Valid
-                                                    ? "bg-[#4CAF50] hover:bg-[#43A047] shadow-md shadow-green-200"
-                                                    : "bg-[#6BA898] hover:bg-[#5a9182]"
+                                                    ? "bg-[#047857] hover:bg-[#047857] shadow-md shadow-green-200"
+                                                    : "bg-[#6BA898] hover:bg-[#6BA898]"
                                             )}
                                         >
                                             Continue
