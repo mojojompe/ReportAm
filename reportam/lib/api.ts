@@ -12,7 +12,9 @@ const api = axios.create({
 export const reportApi = {
     // Submit a new report - UPDATED to use FormData
     submitReport: async (formData: FormData) => {
-        const response = await api.post("/api/reports", formData);
+        const response = await api.post("/api/reports", formData, {
+            headers: { "Content-Type": "multipart/form-data" }, // Let browser handle boundary? Actually, removing is safer, but axios might need undefined
+        });
         return response.data;
     },
 
@@ -28,7 +30,9 @@ export const reportApi = {
         // Note: Backend requires image, but for SOS we might need to handle this differently
         // For now, creating a placeholder - backend should make image optional for emergency
 
-        const response = await api.post("/api/reports/emergency", formData);
+        const response = await api.post("/api/reports/emergency", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
         return response.data;
     },
 

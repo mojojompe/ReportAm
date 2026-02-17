@@ -196,6 +196,8 @@ export function ReportWizard() {
                 });
                 if (selectedLga && typeof selectedLga !== 'string') {
                     formData.append("lga_id", selectedLga._id || selectedLga.id);
+                    // Also send as city_id since backend requires it
+                    formData.append("city_id", selectedLga._id || selectedLga.id);
                 }
             }
 
@@ -226,6 +228,8 @@ export function ReportWizard() {
             setIsSubmitting(false);
         }
     };
+
+    const isStep1Valid = !!selectedCategory && !!watch("lga");
 
     return (
         <div className="mx-auto max-w-2xl px-4 py-8 md:py-12 bg-white min-h-screen md:min-h-0">
@@ -302,7 +306,18 @@ export function ReportWizard() {
                             </div>
 
                             <div className="flex justify-end pt-4">
-                                <Button type="button" onClick={handleNext} className="bg-[#6BA898] hover:bg-[#5a9182] text-white px-8 h-12 rounded-xl text-base font-medium">Continue</Button>
+                                <Button
+                                    type="button"
+                                    onClick={handleNext}
+                                    className={cn(
+                                        "text-white px-8 h-12 rounded-xl text-base font-medium transition-colors duration-200",
+                                        isStep1Valid
+                                            ? "bg-[#4CAF50] hover:bg-[#43A047] shadow-md shadow-green-200" // Brighter green when valid
+                                            : "bg-[#6BA898] hover:bg-[#5a9182]" // Original/Default color
+                                    )}
+                                >
+                                    Continue
+                                </Button>
                             </div>
                         </motion.div>
                     )}
@@ -371,10 +386,27 @@ export function ReportWizard() {
                                 {errors.location && <p className="text-sm text-red-600">{errors.location.message}</p>}
                             </div>
 
-                            <div className="flex justify-between pt-4">
-                                <Button type="button" variant="ghost" onClick={handleBack} className="h-12 border-transparent text-[#475467] hover:text-[#101828]">Back</Button>
-                                <Button type="button" onClick={handleNext} className="bg-[#6BA898] hover:bg-[#5a9182] text-white px-8 h-12 rounded-xl text-base font-medium min-w-[150px]">Continue</Button>
-                            </div>
+                            {(() => {
+                                const isStep2Valid = !!watch("location");
+
+                                return (
+                                    <div className="flex justify-between pt-4">
+                                        <Button type="button" variant="ghost" onClick={handleBack} className="h-12 border-transparent text-[#475467] hover:text-[#101828]">Back</Button>
+                                        <Button
+                                            type="button"
+                                            onClick={handleNext}
+                                            className={cn(
+                                                "text-white px-8 h-12 rounded-xl text-base font-medium min-w-[150px] transition-colors duration-200",
+                                                isStep2Valid
+                                                    ? "bg-[#4CAF50] hover:bg-[#43A047] shadow-md shadow-green-200"
+                                                    : "bg-[#6BA898] hover:bg-[#5a9182]"
+                                            )}
+                                        >
+                                            Continue
+                                        </Button>
+                                    </div>
+                                );
+                            })()}
                         </motion.div>
                     )}
 
@@ -408,6 +440,6 @@ export function ReportWizard() {
                     )}
                 </AnimatePresence>
             </form>
-        </div>
+        </div >
     );
 }
