@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Search, MoreVertical, Eye, Trash2 } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import { toast } from "sonner";
+import { ReportDetailsSheet } from "@/components/ReportDetailsSheet";
 
 export default function ResolvedReportsPage() {
     const [reports, setReports] = useState<any[]>([]);
     const [filteredReports, setFilteredReports] = useState<any[]>([]);
+    const [selectedReport, setSelectedReport] = useState<any | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("all");
     const [lgaFilter, setLgaFilter] = useState("all");
@@ -202,7 +204,7 @@ export default function ResolvedReportsPage() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={() => window.open(`/reports/${report._id || report.id}`, '_blank')}>
+                                                    <DropdownMenuItem onClick={() => setSelectedReport(report)}>
                                                         <Eye className="mr-2 h-4 w-4" />
                                                         View Details
                                                     </DropdownMenuItem>
@@ -223,6 +225,12 @@ export default function ResolvedReportsPage() {
                     )}
                 </CardContent>
             </Card>
+
+            <ReportDetailsSheet
+                report={selectedReport}
+                open={!!selectedReport}
+                onOpenChange={(open) => !open && setSelectedReport(null)}
+            />
         </div>
     );
 }

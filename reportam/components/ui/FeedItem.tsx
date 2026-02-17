@@ -226,7 +226,7 @@ export function FeedItem({ report }: FeedItemProps) {
         setComments(updateLikes(comments));
 
         try {
-            await reportApi.likeComment(commentId);
+            await reportApi.likeComment(commentId, { username: "ReportAm User" });
             // Optionally reload to sync exact state
         } catch (error) {
             console.error("Like failed", error); // Log error

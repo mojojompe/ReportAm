@@ -94,8 +94,8 @@ export const reportApi = {
     },
 
     // Like a comment
-    likeComment: async (commentId: string) => {
-        const response = await api.post(`/api/comments/${commentId}/like`);
+    likeComment: async (commentId: string, data: { username?: string } = { username: "ReportAm User" }) => {
+        const response = await api.post(`/api/comments/${commentId}/like`, data);
         return response.data;
     },
 };
