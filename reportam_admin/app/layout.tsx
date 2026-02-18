@@ -10,6 +10,9 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 export const metadata: Metadata = {
   title: "ReportAm Admin",
   description: "Admin Dashboard for ReportAm",
+  icons: {
+    icon: "/Logo.png",
+  },
 };
 
 export default function RootLayout({

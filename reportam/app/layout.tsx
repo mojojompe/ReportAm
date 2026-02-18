@@ -18,6 +18,9 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "ReportAm - Community Reporting Platform",
   description: "Report issues in your community seamlessly.",
+  icons: {
+    icon: "/Logo.png",
+  },
 };
 
 export default function RootLayout({
