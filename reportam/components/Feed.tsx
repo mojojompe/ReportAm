@@ -51,8 +51,8 @@ const MOCK_REPORTS = [
 ];
 
 export function Feed() {
-    const [reports, setReports] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [reports, setReports] = useState<any[]>(MOCK_REPORTS);
+    const [isLoading, setIsLoading] = useState(true); // Show skeleton for at most 2 seconds
     const [activeFilter, setActiveFilter] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedLga, setSelectedLga] = useState("All Regions");
@@ -71,10 +71,15 @@ export function Feed() {
     ];
 
     useEffect(() => {
+        let didFinish = false;
+
+        // Hard cap: hide skeleton after 2 seconds no matter what
+        const timeout = setTimeout(() => {
+            if (!didFinish) setIsLoading(false);
+        }, 2000);
+
         const fetchData = async () => {
             try {
-                setIsLoading(true);
-
                 // Fetch Reports
                 const reportsData = await reportApi.getReports();
                 console.log("Raw API response:", reportsData);
@@ -83,7 +88,7 @@ export function Feed() {
                 const mappedReports = reportsArray.map((report: any) => ({
                     ...report,
                     id: report._id || report.id,
-                    title: report.description?.substring(0, 50) || report.title,
+                    title: report.title || report.description?.substring(0, 50),
                     description: report.description,
                     location: report.address_text || report.community_name,
                     imageUrl: report.image,
@@ -97,21 +102,23 @@ export function Feed() {
 
                 if (oyoState) {
                     const lgaData = await reportApi.getLgas(oyoState.id || oyoState._id);
-                    // Handle if LGA data is array of strings or objects
                     const lgaNames = lgaData.map((l: any) => typeof l === 'string' ? l : l.name);
                     setLgas(["All Regions", ...lgaNames]);
                 }
 
             } catch (error) {
                 console.error("Failed to fetch data:", error);
-                toast.error("Failed to load data. Using offline data.");
-                setReports(MOCK_REPORTS);
+                // Mock data remains displayed as fallback
             } finally {
+                didFinish = true;
+                clearTimeout(timeout);
                 setIsLoading(false);
             }
         };
 
         fetchData();
+
+        return () => clearTimeout(timeout); // Cleanup on unmount
     }, []);
 
     const filteredReports = reports.filter(r => {
@@ -122,6 +129,7 @@ export function Feed() {
         const matchesLga = selectedLga === "All Regions" || (r.location?.toLowerCase() || "").includes(selectedLga.toLowerCase());
         return matchesFilter && matchesSearch && matchesLga;
     });
+
 
     if (isLoading) {
         return (
