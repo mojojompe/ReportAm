@@ -119,7 +119,8 @@ export const adminApi = {
     getComments: async (): Promise<any[]> => {
         try {
             const response = await api.get("/api/admin/comments");
-            return response.data;
+            // API returns { comments: [...], totalPages, currentPage, total }
+            return response.data.comments || response.data;
         } catch (error) {
             console.error("Failed to fetch comments:", error);
             return [];

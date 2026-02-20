@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "8b9cad0e-1f20-4cad-9cad-0e1f20319cad",
         "name": "ReportAm API",
-        "description": "Comprehensive collection for ReportAm civic reporting backend.",
+        "description": "Comprehensive collection for ReportAm civic reporting backend. Synced with reportam/lib/api.ts and reportam_admin/lib/api.ts.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -26,16 +26,9 @@
                             }
                         },
                         "url": {
-                            "raw": "{{baseUrl}}/api/admin/auth/login",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "admin",
-                                "auth",
-                                "login"
-                            ]
+                            "raw": "{{baseUrl}}/api/admin/login",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "admin", "login"]
                         }
                     }
                 },
@@ -52,15 +45,8 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/api/admin/auth/me",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "admin",
-                                "auth",
-                                "me"
-                            ]
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "admin", "auth", "me"]
                         }
                     }
                 }
@@ -68,7 +54,7 @@
         },
         {
             "name": "Locations",
-            "description": "Endpoints for fetching geographic data like states, LGAs, and communities.",
+            "description": "Endpoints for fetching geographic data like states and LGAs.",
             "item": [
                 {
                     "name": "Get States",
@@ -83,15 +69,35 @@
                     "request": {
                         "method": "GET",
                         "description": "Fetch all Local Government Areas (LGAs) within a specific state.",
-                        "url": "{{baseUrl}}/api/locations/states/:stateId/lgas"
+                        "url": {
+                            "raw": "{{baseUrl}}/api/locations/states/:stateId/lgas",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "locations", "states", ":stateId", "lgas"],
+                            "variable": [
+                                {
+                                    "key": "stateId",
+                                    "value": "PASTE_STATE_ID_HERE"
+                                }
+                            ]
+                        }
                     }
                 },
                 {
-                    "name": "Get Approved Communities",
+                    "name": "Get Approved Communities (by LGA)",
                     "request": {
                         "method": "GET",
                         "description": "Fetch all approved communities within a specific LGA.",
-                        "url": "{{baseUrl}}/api/locations/lgas/:lgaId/communities"
+                        "url": {
+                            "raw": "{{baseUrl}}/api/locations/lgas/:lgaId/communities",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "locations", "lgas", ":lgaId", "communities"],
+                            "variable": [
+                                {
+                                    "key": "lgaId",
+                                    "value": "PASTE_LGA_ID_HERE"
+                                }
+                            ]
+                        }
                     }
                 }
             ]
@@ -101,36 +107,46 @@
             "description": "Public endpoints for submitting and viewing civic reports.",
             "item": [
                 {
-                    "name": "Create Report",
+                    "name": "Create Report (FormData)",
                     "request": {
                         "method": "POST",
-                        "description": "Submit a new civic report (e.g., community-based issues).",
+                        "description": "Submit a new civic report using multipart/form-data (required by backend for image upload).",
+                        "header": [],
                         "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"type\": \"community\",\n  \"category\": \"Road\",\n  \"image\": \"https://image.url\",\n  \"description\": \"Road is flooded\",\n  \"state_id\": \"PASTE_ID_HERE\",\n  \"city\": \"Ibadan\",\n  \"lga_id\": \"PASTE_ID_HERE\",\n  \"community_name\": \"Elebu\",\n  \"community_id\": \"OPTIONAL_COMMUNITY_ID\",\n  \"address_text\": \"Elebu junction\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
+                            "mode": "formdata",
+                            "formdata": [
+                                { "key": "type", "value": "community", "type": "text" },
+                                { "key": "category", "value": "Road", "type": "text" },
+                                { "key": "description", "value": "Road is flooded near the junction", "type": "text" },
+                                { "key": "state_id", "value": "PASTE_STATE_ID_HERE", "type": "text" },
+                                { "key": "city", "value": "Ibadan", "type": "text" },
+                                { "key": "lga_id", "value": "PASTE_LGA_ID_HERE", "type": "text" },
+                                { "key": "community_name", "value": "Elebu", "type": "text" },
+                                { "key": "address_text", "value": "Elebu junction", "type": "text" },
+                                { "key": "lat", "value": "7.3775", "type": "text" },
+                                { "key": "lng", "value": "3.9470", "type": "text" },
+                                { "key": "image", "type": "file", "src": [] }
+                            ]
                         },
                         "url": "{{baseUrl}}/api/reports"
                     }
                 },
                 {
-                    "name": "Emergency Report",
+                    "name": "Emergency Report (FormData)",
                     "request": {
                         "method": "POST",
-                        "description": "Submit an urgent emergency report.",
+                        "description": "Submit an urgent emergency/SOS report using multipart/form-data.",
                         "header": [],
                         "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"type\": \"general\",\n  \"category\": \"Emergency\",\n  \"image\": \"https://image.url\",\n  \"description\": \"URGENT incident\",\n  \"state_id\": \"PASTE_ID_HERE\",\n  \"city\": \"Ikeja\",\n  \"lga_id\": \"PASTE_ID_HERE\",\n  \"address_text\": \"Update address here\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
+                            "mode": "formdata",
+                            "formdata": [
+                                { "key": "type", "value": "general", "type": "text" },
+                                { "key": "category", "value": "Emergency", "type": "text" },
+                                { "key": "description", "value": "🚨 EMERGENCY SOS ALERT - Immediate assistance required!", "type": "text" },
+                                { "key": "address_text", "value": "Emergency at: 7.3775, 3.9470", "type": "text" },
+                                { "key": "lat", "value": "7.3775", "type": "text" },
+                                { "key": "lng", "value": "3.9470", "type": "text" }
+                            ]
                         },
                         "url": "{{baseUrl}}/api/reports/emergency"
                     }
@@ -139,41 +155,113 @@
                     "name": "Get Report Feed",
                     "request": {
                         "method": "GET",
-                        "description": "Retrieve a paginated list of public reports.",
-                        "url": "{{baseUrl}}/api/reports?page=1&limit=20"
-                    }
-                },
-                {
-                    "name": "Get Communities (Global)",
-                    "request": {
-                        "method": "GET",
-                        "description": "Fetch a list of all communities across all regions.",
-                        "url": "{{baseUrl}}/api/locations/communities"
-                    }
-                },
-                {
-                    "name": "Get Community Reports",
-                    "request": {
-                        "method": "GET",
-                        "description": "Fetch reports specific to a particular community.",
-                        "url": "{{baseUrl}}/api/reports/community/:communityId"
+                        "description": "Retrieve a paginated, filterable list of public reports.",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/reports?page=1&limit=20",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "reports"],
+                            "query": [
+                                { "key": "page", "value": "1" },
+                                { "key": "limit", "value": "20" },
+                                { "key": "status", "value": "pending", "disabled": true },
+                                { "key": "category", "value": "Road", "disabled": true },
+                                { "key": "is_emergency", "value": "true", "disabled": true }
+                            ]
+                        }
                     }
                 },
                 {
                     "name": "Mark Affected",
                     "request": {
                         "method": "POST",
-                        "description": "Indicate that a report affects you using a device fingerprint.",
+                        "description": "Indicate that a report affects you.",
+                        "header": [],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"fingerprint\": \"device-123\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
+                            "raw": "{}",
+                            "options": { "raw": { "language": "json" } }
                         },
-                        "url": "{{baseUrl}}/api/reports/:id/affected"
+                        "url": {
+                            "raw": "{{baseUrl}}/api/reports/:id/affected",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "reports", ":id", "affected"],
+                            "variable": [
+                                { "key": "id", "value": "PASTE_REPORT_ID_HERE" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Unmark Affected",
+                    "request": {
+                        "method": "DELETE",
+                        "description": "Remove the affected mark from a report.",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/reports/:id/affected",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "reports", ":id", "affected"],
+                            "variable": [
+                                { "key": "id", "value": "PASTE_REPORT_ID_HERE" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Comments",
+                    "request": {
+                        "method": "GET",
+                        "description": "Fetch all comments for a specific report.",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/reports/:id/comments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "reports", ":id", "comments"],
+                            "variable": [
+                                { "key": "id", "value": "PASTE_REPORT_ID_HERE" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Post Comment",
+                    "request": {
+                        "method": "POST",
+                        "description": "Post a comment (or reply) on a specific report.",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"text\": \"This is my comment\",\n  \"username\": \"Anonymous User\",\n  \"parentId\": null\n}",
+                            "options": { "raw": { "language": "json" } }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/reports/:id/comments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "reports", ":id", "comments"],
+                            "variable": [
+                                { "key": "id", "value": "PASTE_REPORT_ID_HERE" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Like Comment",
+                    "request": {
+                        "method": "POST",
+                        "description": "Like a comment by its ID.",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"ReportAm User\"\n}",
+                            "options": { "raw": { "language": "json" } }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/comments/:commentId/like",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "comments", ":commentId", "like"],
+                            "variable": [
+                                { "key": "commentId", "value": "PASTE_COMMENT_ID_HERE" }
+                            ]
+                        }
                     }
                 }
             ]
@@ -183,63 +271,60 @@
             "description": "Manage requests for adding new communities to the platform.",
             "item": [
                 {
-                    "name": "Get All Requests (Admin)",
-                    "request": {
-                        "method": "GET",
-                        "description": "Retrieve all pending community addition requests (Admin only).",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
-                        ],
-                        "url": "{{baseUrl}}/api/community-requests/admin"
-                    }
-                },
-                {
-                    "name": "Submit Request",
+                    "name": "Submit Community Request",
                     "request": {
                         "method": "POST",
                         "description": "Submit a request to add a new community to the system.",
                         "header": [],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"community_name\": \"New Community\",\n  \"street_name\": \"Main Street\",\n  \"state_id\": \"PASTE_ID_HERE\",\n  \"city\": \"Ibadan\",\n  \"lga_id\": \"PASTE_ID_HERE\",\n  \"image\": \"https://image.url\",\n  \"address_description\": \"Optional details\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
+                            "raw": "{\n  \"community_name\": \"New Community\",\n  \"street_name\": \"Main Street\",\n  \"state_id\": \"PASTE_ID_HERE\",\n  \"city\": \"Ibadan\",\n  \"lga_id\": \"PASTE_ID_HERE\",\n  \"address_description\": \"Optional details\"\n}",
+                            "options": { "raw": { "language": "json" } }
                         },
                         "url": "{{baseUrl}}/api/community-requests"
                     }
                 },
                 {
-                    "name": "Approve Request",
+                    "name": "Get All Requests (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "description": "Retrieve all pending community addition requests (Admin only).",
+                        "header": [
+                            { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+                        ],
+                        "url": "{{baseUrl}}/api/community-requests/admin"
+                    }
+                },
+                {
+                    "name": "Approve Community Request (Admin)",
                     "request": {
                         "method": "POST",
                         "description": "Approve a community addition request (Admin only).",
                         "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
+                            { "key": "Authorization", "value": "Bearer {{adminToken}}" }
                         ],
-                        "url": "{{baseUrl}}/api/community-requests/admin/:id/approve"
+                        "url": {
+                            "raw": "{{baseUrl}}/api/community-requests/admin/:id/approve",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "community-requests", "admin", ":id", "approve"],
+                            "variable": [{ "key": "id", "value": "PASTE_REQUEST_ID_HERE" }]
+                        }
                     }
                 },
                 {
-                    "name": "Reject Request",
+                    "name": "Reject Community Request (Admin)",
                     "request": {
                         "method": "POST",
                         "description": "Reject a community addition request (Admin only).",
                         "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
+                            { "key": "Authorization", "value": "Bearer {{adminToken}}" }
                         ],
-                        "url": "{{baseUrl}}/api/community-requests/admin/:id/reject"
+                        "url": {
+                            "raw": "{{baseUrl}}/api/community-requests/admin/:id/reject",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "community-requests", "admin", ":id", "reject"],
+                            "variable": [{ "key": "id", "value": "PASTE_REQUEST_ID_HERE" }]
+                        }
                     }
                 }
             ]
@@ -252,77 +337,87 @@
                     "name": "Get All Reports (Admin)",
                     "request": {
                         "method": "GET",
-                        "description": "Retrieve all reports with optional status filtering (Admin only).",
+                        "description": "Retrieve all reports (Admin only). Supports optional status filter.",
                         "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
+                            { "key": "Authorization", "value": "Bearer {{adminToken}}" }
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/api/admin/reports?status=pending",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "admin",
-                                "reports"
-                            ],
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "admin", "reports"],
                             "query": [
-                                {
-                                    "key": "status",
-                                    "value": "pending"
-                                }
+                                { "key": "status", "value": "pending", "disabled": true }
                             ]
                         }
                     }
                 },
                 {
-                    "name": "Update Report Status",
+                    "name": "Update Report Status (Admin)",
                     "request": {
                         "method": "PATCH",
-                        "description": "Update the status of a report (e.g., from pending to resolved).",
+                        "description": "Update the status of a report (e.g., pending → resolved).",
                         "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
+                            { "key": "Authorization", "value": "Bearer {{adminToken}}" }
                         ],
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"status\": \"resolved\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
+                            "options": { "raw": { "language": "json" } }
                         },
-                        "url": "{{baseUrl}}/api/admin/reports/:id/status"
+                        "url": {
+                            "raw": "{{baseUrl}}/api/admin/reports/:id/status",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "admin", "reports", ":id", "status"],
+                            "variable": [{ "key": "id", "value": "PASTE_REPORT_ID_HERE" }]
+                        }
                     }
                 },
                 {
-                    "name": "Delete Report",
+                    "name": "Delete Report (Admin)",
                     "request": {
                         "method": "DELETE",
                         "description": "Permanently delete a report from the system.",
                         "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{adminToken}}"
-                            }
+                            { "key": "Authorization", "value": "Bearer {{adminToken}}" }
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/api/admin/reports/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "admin",
-                                "reports",
-                                ":id"
-                            ]
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "admin", "reports", ":id"],
+                            "variable": [{ "key": "id", "value": "PASTE_REPORT_ID_HERE" }]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Admin Comments",
+            "description": "Administrative endpoints for managing user comments.",
+            "item": [
+                {
+                    "name": "Get All Comments (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "description": "Retrieve all comments across all reports (Admin only).",
+                        "header": [
+                            { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+                        ],
+                        "url": "{{baseUrl}}/api/admin/comments"
+                    }
+                },
+                {
+                    "name": "Delete Comment (Admin)",
+                    "request": {
+                        "method": "DELETE",
+                        "description": "Permanently delete a comment by ID (Admin only).",
+                        "header": [
+                            { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/admin/comments/:id",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "admin", "comments", ":id"],
+                            "variable": [{ "key": "id", "value": "PASTE_COMMENT_ID_HERE" }]
                         }
                     }
                 }
@@ -336,15 +431,11 @@
                     "name": "Upload Image",
                     "request": {
                         "method": "POST",
-                        "description": "Upload an image file to the server and receive the URL.",
+                        "description": "Upload an image file to the server and receive the URL back.",
                         "body": {
                             "mode": "formdata",
                             "formdata": [
-                                {
-                                    "key": "image",
-                                    "type": "file",
-                                    "src": []
-                                }
+                                { "key": "image", "type": "file", "src": [] }
                             ]
                         },
                         "url": "{{baseUrl}}/api/uploads/image"
@@ -356,21 +447,11 @@
     "event": [
         {
             "listen": "prerequest",
-            "script": {
-                "type": "text/javascript",
-                "exec": [
-                    ""
-                ]
-            }
+            "script": { "type": "text/javascript", "exec": [""] }
         },
         {
             "listen": "test",
-            "script": {
-                "type": "text/javascript",
-                "exec": [
-                    ""
-                ]
-            }
+            "script": { "type": "text/javascript", "exec": [""] }
         }
     ],
     "variable": [
@@ -382,7 +463,8 @@
         {
             "key": "adminToken",
             "value": "",
-            "type": "string"
+            "type": "string",
+            "description": "Set this after running Admin Login"
         }
     ]
 }

@@ -110,7 +110,11 @@ export default function CommentsPage() {
                                         </TableCell>
                                         <TableCell>{comment.username || "Anonymous"}</TableCell>
                                         <TableCell className="max-w-[200px] truncate text-muted-foreground">
-                                            {comment.reportTitle || "Report #" + (comment.reportId?.substring(0, 6) || "???")}
+                                            {comment.reportId?.description
+                                                ? comment.reportId.description.substring(0, 50)
+                                                : comment.reportId?._id
+                                                    ? "Report #" + comment.reportId._id.substring(0, 6)
+                                                    : "N/A"}
                                         </TableCell>
                                         <TableCell>{new Date(comment.createdAt || comment.timestamp).toLocaleDateString()}</TableCell>
                                         <TableCell className="text-right">

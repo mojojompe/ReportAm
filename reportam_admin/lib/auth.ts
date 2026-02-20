@@ -26,6 +26,7 @@ export const authService = {
                     localStorage.setItem(AUTH_KEY, "true");
                     localStorage.setItem(TOKEN_KEY, response.data.token);
                 }
+                console.log("[ReportAm Admin] Token received:", response.data.token);
                 return true;
             }
             return false;
