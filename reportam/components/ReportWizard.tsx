@@ -70,6 +70,7 @@ export function ReportWizard() {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isVideo, setIsVideo] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLocating, setIsLocating] = useState(false);
     const [states, setStates] = useState<any[]>([]);
@@ -131,9 +132,18 @@ export function ReportWizard() {
 
     const handleBack = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            if (file.size > MAX_FILE_SIZE) {
+                toast.error("File is too large. Maximum size is 20MB.");
+                return;
+            }
+
+            const videoType = file.type.startsWith("video/");
+            setIsVideo(videoType);
             setValue("image", file);
             setPreviewUrl(URL.createObjectURL(file));
         }
@@ -179,6 +189,7 @@ export function ReportWizard() {
             formData.append("description", data.description || data.title); // Use title as description if no description
             formData.append("address_text", data.location); // Map location to address_text
             formData.append("community_name", data.lga); // Use LGA as community name for now
+            formData.append("is_video", isVideo ? "true" : "false");
 
             // Find the Oyo state ID and LGA ID
             if (states.length > 0) {
@@ -327,15 +338,19 @@ export function ReportWizard() {
                         <motion.div key="step2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-8">
                             <div className="space-y-4">
                                 <div>
-                                    <h2 className="text-lg font-bold font-display text-[#101828]">Add a Photo</h2>
-                                    <p className="text-sm text-[#475467]">A photo helps authorities understand the issue better</p>
+                                    <h2 className="text-lg font-bold font-display text-[#101828]">Add Media</h2>
+                                    <p className="text-sm text-[#475467]">A photo or video helps authorities understand the issue better (max 20MB)</p>
                                 </div>
 
                                 <div className="border-[2px] border-dashed border-[#E0E0E0] rounded-2xl p-8 flex flex-col items-center justify-center gap-6 bg-[#FCFCFD]">
                                     {previewUrl ? (
-                                        <div className="relative aspect-video w-full overflow-hidden rounded-xl">
-                                            <img src={previewUrl} alt="Preview" className="h-full w-full object-cover" />
-                                            <Button type="button" variant="secondary" size="sm" className="absolute right-2 top-2 h-8 w-8 rounded-full p-0 bg-white/80 hover:bg-white" onClick={() => { setPreviewUrl(null); setValue("image", undefined); }}>
+                                        <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
+                                            {isVideo ? (
+                                                <video src={previewUrl} controls className="h-full w-full object-contain" />
+                                            ) : (
+                                                <img src={previewUrl} alt="Preview" className="h-full w-full object-cover" />
+                                            )}
+                                            <Button type="button" variant="secondary" size="sm" className="absolute right-2 top-2 h-8 w-8 rounded-full p-0 bg-white/80 hover:bg-white z-10" onClick={() => { setPreviewUrl(null); setValue("image", undefined); setIsVideo(false); }}>
                                                 <Trash2 className="h-4 w-4 text-red-600" />
                                             </Button>
                                         </div>
@@ -343,21 +358,16 @@ export function ReportWizard() {
                                         <>
                                             <div className="flex flex-col items-center gap-2">
                                                 <div className="h-14 w-14 rounded-full bg-[#F2F4F7] flex items-center justify-center text-[#667085]">
-                                                    <ImageIcon className="h-7 w-7" />
+                                                    <UploadCloud className="h-7 w-7" />
                                                 </div>
-                                                <p className="text-sm text-[#475467] font-medium">Add a photo of the issue</p>
+                                                <p className="text-sm text-[#475467] font-medium text-center">Click below to upload a photo or video</p>
                                             </div>
                                             <div className="flex gap-4 w-full justify-center max-w-sm">
-                                                <label className="flex-1 cursor-pointer group">
-                                                    <input type="file" accept="image/*" className="hidden" capture="environment" onChange={handleImageUpload} />
-                                                    <div className="flex h-11 items-center justify-center gap-2 rounded-xl border border-[#D0D5DD] bg-white px-4 text-sm font-semibold text-[#344054] shadow-xs transition-colors hover:bg-[#F9FAFB] group-active:translate-y-0.5">
-                                                        <Camera className="h-4 w-4" /> Camera
-                                                    </div>
-                                                </label>
-                                                <label className="flex-1 cursor-pointer group">
-                                                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                                                    <div className="flex h-11 items-center justify-center gap-2 rounded-xl border border-[#D0D5DD] bg-white px-4 text-sm font-semibold text-[#344054] shadow-xs transition-colors hover:bg-[#F9FAFB] group-active:translate-y-0.5">
-                                                        <UploadCloud className="h-4 w-4" /> Gallery
+                                                <label className="w-full cursor-pointer group">
+                                                    <input type="file" accept="image/*,video/*" className="hidden" onChange={handleFileUpload} />
+                                                    <div className="flex h-12 items-center justify-center gap-2 rounded-xl border border-[#D0D5DD] bg-white px-4 text-sm font-semibold text-[#344054] shadow-sm transition-all hover:bg-[#F9FAFB] hover:border-[#6BA898]/50 group-active:scale-95">
+                                                        <ImageIcon className="h-5 w-5 text-[#6BA898]" />
+                                                        Upload File
                                                     </div>
                                                 </label>
                                             </div>
@@ -440,6 +450,6 @@ export function ReportWizard() {
                     )}
                 </AnimatePresence>
             </form>
-        </div >
+        </div>
     );
 }

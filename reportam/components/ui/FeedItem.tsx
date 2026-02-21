@@ -32,6 +32,7 @@ interface Report {
     timestamp: string;
     category?: string;
     affected_count?: number;
+    is_video?: boolean;
 }
 
 interface FeedItemProps {
@@ -136,7 +137,7 @@ export function FeedItem({ report }: FeedItemProps) {
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
-                ignoreElements: (element) => element.tagName === 'IFRAME',
+                ignoreElements: (element) => element.tagName === 'IFRAME' || element.tagName === 'VIDEO',
                 proxy: "https://reportam-backend-sun4.onrender.com", // Hint to html2canvas to reuse backend if feasible, or just rely on useCORS
             });
             const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'));
@@ -235,6 +236,12 @@ export function FeedItem({ report }: FeedItemProps) {
         }
     };
 
+    const mediaUrl = (report.image || report.imageUrl)?.startsWith("http")
+        ? (report.image || report.imageUrl)
+        : `https://reportam-backend-sun4.onrender.com${(report.image || report.imageUrl)?.startsWith('/') ? '' : '/'}${report.image || report.imageUrl}`;
+
+    const isVideo = report.is_video || (mediaUrl && /\.(mp4|webm|ogg|mov|wmv|flv|avi)$/i.test(mediaUrl));
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -243,16 +250,19 @@ export function FeedItem({ report }: FeedItemProps) {
             transition={{ duration: 0.3 }}
         >
             <Card ref={cardRef} className="overflow-hidden border border-[#EAECF0] bg-white shadow-sm hover:shadow-md transition-shadow duration-300 rounded-2xl sm:rounded-3xl">
-                {/* Image - Full Width, No Padding */}
-                {/* Image - Full Width, No Padding */}
-                {/* Robust Image Handling */}
+                {/* Media Handling */}
                 {(report.imageUrl || report.image) && (
-                    <div>
-                        <div className="relative aspect-video w-full bg-[#F2F4F7]">
+                    <div className="relative aspect-video w-full bg-black">
+                        {isVideo ? (
+                            <video
+                                src={mediaUrl}
+                                controls
+                                className="h-full w-full object-contain"
+                                crossOrigin="anonymous"
+                            />
+                        ) : (
                             <img
-                                src={(report.image || report.imageUrl)?.startsWith("http")
-                                    ? (report.image || report.imageUrl)
-                                    : `https://reportam-backend-sun4.onrender.com${(report.image || report.imageUrl)?.startsWith('/') ? '' : '/'}${report.image || report.imageUrl}`}
+                                src={mediaUrl}
                                 alt={report.title}
                                 className="h-full w-full object-cover"
                                 crossOrigin="anonymous"
@@ -260,7 +270,7 @@ export function FeedItem({ report }: FeedItemProps) {
                                     (e.target as HTMLImageElement).src = "https://placehold.co/600x400?text=No+Image";
                                 }}
                             />
-                        </div>
+                        )}
                     </div>
                 )}
 

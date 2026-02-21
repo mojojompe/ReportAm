@@ -48,6 +48,19 @@ const MOCK_REPORTS = [
         timestamp: new Date(Date.now() - 172800000).toISOString(),
         category: "Waste"
     },
+    {
+        id: "4",
+        title: "Flooding on ExpressWay",
+        description: "Heavy rainfall has caused serious flooding on the expressway. Please avoid this route.",
+        location: "Ibadan, Oyo",
+        imageUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        status: "pending" as const,
+        likes: 156,
+        comments: 42,
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        category: "Road",
+        is_video: true
+    }
 ];
 
 export function Feed() {
