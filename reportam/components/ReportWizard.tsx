@@ -186,6 +186,7 @@ export function ReportWizard() {
             // type, category, image, description, state_id, lga_id, address_text
             formData.append("type", "community"); // Default type
             formData.append("category", data.category);
+            formData.append("title", data.title); // Backend now handles title
             formData.append("description", data.description || data.title); // Use title as description if no description
             formData.append("address_text", data.location); // Map location to address_text
             formData.append("community_name", data.lga); // Use LGA as community name for now
