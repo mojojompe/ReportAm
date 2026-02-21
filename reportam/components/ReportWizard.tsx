@@ -183,7 +183,7 @@ export function ReportWizard() {
             const formData = new FormData();
 
             // Backend expects these fields:
-            // type, category, image, description, state_id, lga_id, address_text
+            // type, category, media, description, title, state_id, lga_id, address_text
             formData.append("type", "community"); // Default type
             formData.append("category", data.category);
             formData.append("title", data.title); // Backend now handles title
@@ -212,10 +212,9 @@ export function ReportWizard() {
                     formData.append("city_id", selectedLga._id || selectedLga.id);
                 }
             }
-
             if (data.latitude) formData.append("lat", data.latitude.toString());
             if (data.longitude) formData.append("lng", data.longitude.toString());
-            if (data.image) formData.append("image", data.image);
+            if (data.image) formData.append("media", data.image);
 
             // Log FormData contents
             console.log("FormData being sent:");
